@@ -11,15 +11,18 @@ libraries which require that. E.g. polars lambda functions. Sometimes it
 might just be nice to have. `pyo3` the corrosponding api for python has
 the feature `acquire_gil_lock()` allowing threads in turn to call the
 python interpreter. Here I show something similar is possible with
-extendr\_api, when using two mpsc-channels and a shared mutex. - Main
-thread is called `main:` Child threads are called `child_1` and
-`child_2`. - Spawned Children recieve a mutex locked reference to a
-“phone” where they can call the main thread and ask to do stuff in R for
-them. - Only one child can call with main thread at the time. Other
-cildren will just wait for their turn. - Main thread will return answers
-from R session to the child it is in a call with. Hence the correct
-child will recieve the answer and then hang up or make a new request. -
-Main thread will terminate when all phones are destroyed.
+extendr\_api, when using two mpsc-channels and a shared mutex.
+
+-   Main thread is called `main:` Child threads are called `child_1` and
+    `child_2`.
+-   Spawned Children recieve a mutex locked reference to a “phone” where
+    they can call the main thread and ask to do stuff in R for them.
+-   Only one child can call with main thread at the time. Other cildren
+    will just wait for their turn.
+-   Main thread will return answers from R session to the child it is in
+    a call with. Hence the correct child will recieve the answer and
+    then hang up or make a new request.
+-   Main thread will terminate when all phones are destroyed.
 
 ``` r
 #try it out
@@ -40,7 +43,7 @@ Knitr-rmarkdown. So here is the full print of what just happend.
     child_1: has sent request to main
     main: recieved following msg call from a child: {print('R is working for thread_1
     '); as.character(2+2)}
-    main: will execute latest recieved a message in R session
+    main: will execute latest recieved message in R session
     child_2: also tries make call with child_phone but will wait
 
     [1] "R is working for thread_1\n"
