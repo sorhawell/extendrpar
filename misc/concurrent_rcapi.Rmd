@@ -1,3 +1,65 @@
+---
+title: "Safe concurrent RCapi calls with extendr"
+author: "Søren Welling"
+date: "8/30/2022"
+output: rmarkdown::github_document
+---
+
+
+```{r setup, include=FALSE}
+rextendr::document()
+```
+
+## Concurrent calls to the CRapi.
+
+Calling R via extendr_api from rust threads will very likely lead to a crash. Some times multi-threadding is neccsary e.g. when porting libraries which require that. E.g. polars lambda functions. Sometimes it might just be nice to have. `pyo3` the corrosponding api for python has the feature `acquire_gil_lock()` allowing threads in turn to call the python interpreter. Here I show something similar is possible with extendr_api, when using two mpsc-channels and a shared mutex.
+ - Main thread is called `main:` Child threads are called `child_1` and `child_2`.
+ - Spawned Children recieve a mutex locked reference to a "phone" where they can call the main thread and ask to do stuff in R for them.
+ - Only one child can call with main thread at the time. Other cildren will just wait for their turn.
+ - Main thread will return answers from R session to the child it is in a call with. Hence the correct child will recieve the answer and then hang up or make a new request.
+ - Main thread will terminate when all phones are destroyed.
+
+```{r compile}
+#try it out
+par_c_api_calls()
+
+```
+
+Unfortunately threaded rprintln seems not allowed when called from Knitr-rmarkdown.
+So here is the full print of what just happend.
+```
+child_1: destroyed it's phone (surpringly printed first, but whatever)
+child_1: try make call with child_phone
+child_1: has started a call
+child_1: has sent request to main
+main: recieved following msg call from a child: {print('R is working for thread_1
+'); as.character(2+2)}
+main: will execute latest recieved message in R session
+child_2: also tries make call with child_phone but will wait
+
+[1] "R is working for thread_1\n"
+main: returned from R session
+main: thread gave R answer to a child
+child_1: got this answer from main: 4
+child_1: hung up the phone / ended the call
+child_2: finally has started a call
+child_2: sent request to main
+main: recieved following msg call from a child: {print('R is working for thread_2
+'); as.character(2+3)}
+main: will execute latest recieved a message in R session
+[1] "R is working for thread_2\n"
+main: returned from R session
+main: thread gave R answer to a child
+child_2: got this answer from main: 5
+child_2: will end the call and destroy it's phone
+main: thread noticed all children destroyed their phones, time to return
+[1] "threadding complete"
+
+```
+
+
+Here is the rust code...
+```
 use extendr_api::prelude::*;
 
 use std::sync::{Arc, Mutex};
@@ -100,3 +162,5 @@ extendr_module! {
     mod extendrpar;
     fn par_c_api_calls;
 }
+
+```

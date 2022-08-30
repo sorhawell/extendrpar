@@ -9,5 +9,5 @@
 NULL
 
 #' @export
-par_call_RCapi <- function(robj) .Call(wrap__par_call_RCapi, robj)
+par_c_api_calls <- function() .Call(wrap__par_c_api_calls)
 
