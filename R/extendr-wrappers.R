@@ -10,3 +10,5 @@ NULL
 
 par_c_api_epic <- function() .Call(wrap__par_c_api_epic)
 
+par_con_handler <- function() .Call(wrap__par_con_handler)
+
