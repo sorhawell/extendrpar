@@ -8,10 +8,5 @@
 #' @useDynLib extendrpar, .registration = TRUE
 NULL
 
-#' @export
-par_c_api_calls <- function() .Call(wrap__par_c_api_calls)
-
-par_c_api_fancy <- function() .Call(wrap__par_c_api_fancy)
-
 par_c_api_epic <- function() .Call(wrap__par_c_api_epic)
 
