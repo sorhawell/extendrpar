@@ -8,4 +8,5 @@ crate-type = [ 'staticlib' ]
 
 [dependencies]
 extendr-api = '*'
-
+state = "*"
+flume = "*"
