@@ -48,7 +48,7 @@ impl<S, R> ThreadCom<S, R> {
 
     //send request to main thread
     pub fn send(&self, s: S) {
-        self.mains_tx.send((s, self.child_tx.clone())).unwrap()
+        self.mains_tx.send((s, self.child_tx.clone())).expect("failed to send to main thread, likely do to user interrupt, shutting down with a good old panic!!!");
     }
 
     //wait to recieve answer from main thread
@@ -84,7 +84,7 @@ where
     I: Fn(S) -> R + Send + 'static,
     R: Send + 'static,
     S: Send + 'static + std::fmt::Display,
-    T: Send + 'static,
+    T: Send + 'static + Default,
 {
     //start com unboundeds
 
@@ -139,7 +139,7 @@ where
                         let res_res = extendr_api::eval_string(&"print('check user');Sys.sleep(0)");
                         if res_res.is_err() {
                             rprintln!("R user signalled interrupt");
-                            break;
+                            return (T::default());
                         }
 
                         //TODO sub-optimal way to finish, better if secondlast threadcom destroys the global threadcom

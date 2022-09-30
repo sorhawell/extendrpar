@@ -10,6 +10,8 @@ use std::thread;
 use state::Storage;
 static CONFIG: Storage<RwLock<Option<ThreadCom<String, ParRObj>>>> = Storage::new();
 
+//hello cargo
+
 #[extendr]
 fn par_con_handler() -> i32 {
     //chose outer return type
@@ -21,14 +23,14 @@ fn par_con_handler() -> i32 {
 
             let mut v = Vec::new();
             for _ in 0..3 {
-                thread::sleep(std::time::Duration::from_millis(3));
+                thread::sleep(std::time::Duration::from_millis(300));
                 //let tc_clone = thread_com.clone();
 
                 let h = thread::spawn(move || {
                     let mut vv = Vec::new();
                     //let thread_com = tc_clone;
                     for j in 0..3 {
-                        thread::sleep(std::time::Duration::from_millis(3));
+                        thread::sleep(std::time::Duration::from_millis(300));
                         //oups forgot to bring thread_com
                         //let tc_clone = thread_com.clone();
                         let hh = thread::spawn(move || {
@@ -42,14 +44,13 @@ fn par_con_handler() -> i32 {
                                 .clone();
 
                             for _ in 0..3 {
-                                thread::sleep(std::time::Duration::from_millis(15));
+                                thread::sleep(std::time::Duration::from_millis(150));
                                 thread_com.send(format!("print('hej from thread_{}');1:4", j));
                                 let _answer: ParRObj = thread_com.recv();
                             }
                             // {
                             //     let _drop_me = thread_com;
                             // }
-                            //thread::sleep(std::time::Duration::from_millis(5000));
                         });
                         vv.push(hh);
                     }
